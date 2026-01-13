@@ -1,11 +1,10 @@
 #pragma once
 
 #include "handler_interface.h"
-#include "enums.h"
 
 class SortingReporterImpl : public SortingHandler {
 public:
-    ~SortingReporterImpl();
+    ~SortingReporterImpl() override;
 
     void StartShift(const SortingHill& sorting_hill) override;
     void EndShift(const SortingHill& sorting_hill) override;

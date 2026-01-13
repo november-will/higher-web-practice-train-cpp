@@ -5,8 +5,8 @@
 #include <array>
 #include <iostream>
 #include <optional>
-#include <vector>
 #include <string>
+#include <vector>
 
 struct Wagon {
     int number;
@@ -17,8 +17,38 @@ struct Locomotive {
     LocoType loco_type;
 };
 
+// Информация о выполненной операции.
+// Заполняется оператором и затем используется:
+//  SortingHill: обновление состояния и метрик
+//  SortingReporterImpl: печать отчёта
 struct OperationInfo {
+    EventType event_type = EventType::kShiftStarted;
+    bool success = false;
 
+    // Где применилось (если применилось)
+    std::optional<int> path_id;
+    std::optional<std::string> train_number;
+
+    // Локомотив
+    std::optional<LocoType> loco_type;
+    std::optional<int> loco_capacity;
+    bool loco_attached = false;   // true, если локомотив был прицеплен к конкретному поезду
+    bool loco_reserved = false;   // true, если локомотив ушёл в резерв (нет поездов без локомотива)
+
+    // Вагон
+    std::optional<Wagon> wagon;
+    std::optional<bool> wagon_to_ring;  // true -> на кольцевой путь, false -> в поезд
+    std::optional<size_t> train_wagons; // текущее кол-во вагонов в поезде после добавления
+    std::optional<int> train_capacity;  // вместимость локомотива поезда (если известна)
+
+    // Кольцевой путь
+    std::optional<size_t> ring_total; // текущее заполнение кольца
+    std::optional<size_t> ring_max;   // максимум за смену
+
+    // Отправка поезда
+    bool train_sent = false;
+
+    std::string message; // для отладки/логов
 };
 
 inline constexpr std::array<EventType, 17> kEventsBalanced = {
@@ -72,14 +102,16 @@ inline std::ostream& operator<<(std::ostream& os, EventType event_type) {
     return os;
 }
 
+// cоответствие комментариям в enums.h
+// Freight -> "Г", Pass -> "Л", Danger -> "О"
 inline std::ostream& operator<<(std::ostream& os, TrainType train_type) {
     using namespace std::literals;
     switch (train_type) {
         case TrainType::kFreight:
-            os << "О"s;
+            os << "Г"s;
             break;
         case TrainType::kDanger:
-            os << "Г"s;
+            os << "О"s;
             break;
         case TrainType::kPass:
             os << "Л"s;

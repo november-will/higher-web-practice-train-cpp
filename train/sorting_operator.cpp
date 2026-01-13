@@ -1,27 +1,36 @@
 #include "sorting_operator.h"
 
-SortingOperatorImpl::~SortingOperatorImpl() {}
+#include <iostream>
 
-void SortingOperatorImpl::StartShift(const SortingHill&) {}
+using namespace std::literals;
 
-void SortingOperatorImpl::EndShift(const SortingHill&) {}
-
-void SortingOperatorImpl::PreparePath(SortingHill& sorting_hill, OperationInfo& operation_info) {
-
+SortingOperatorImpl::~SortingOperatorImpl() {
 }
 
-void SortingOperatorImpl::AllocatePathForTrain(SortingHill& sorting_hill, OperationInfo& operation_info) {
-
+void SortingOperatorImpl::StartShift(const SortingHill& sorting_hill) {
+    runtime_.StartShift(sorting_hill.GetNumberOfPaths());
 }
 
-void SortingOperatorImpl::HandleLocomotive(SortingHill& sorting_hill, const Locomotive& locomotive, OperationInfo& operation_info) {
-
+void SortingOperatorImpl::EndShift(const SortingHill&) {
+    runtime_.EndShift();
 }
 
-void SortingOperatorImpl::HandleWagon(SortingHill& sorting_hill, const Wagon& wagon, OperationInfo& operation_info) {
+void SortingOperatorImpl::PreparePath(SortingHill&, OperationInfo& operation_info) {
+    runtime_.PreparePath(&operation_info);
+}
 
+void SortingOperatorImpl::AllocatePathForTrain(SortingHill&, OperationInfo& operation_info) {
+    runtime_.AllocateTrain(&operation_info);
+}
+
+void SortingOperatorImpl::HandleLocomotive(SortingHill&, const Locomotive& locomotive, OperationInfo& operation_info) {
+    runtime_.HandleLocomotive(locomotive, &operation_info);
+}
+
+void SortingOperatorImpl::HandleWagon(SortingHill&, const Wagon& wagon, OperationInfo& operation_info) {
+    runtime_.HandleWagon(wagon, &operation_info);
 }
 
 void SortingOperatorImpl::SendTrain(SortingHill& sorting_hill, OperationInfo& operation_info) {
-
+    runtime_.SendTrain(sorting_hill, /*force=*/sorting_hill.IsShiftEnding(), &operation_info);
 }
