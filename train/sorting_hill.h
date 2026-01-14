@@ -16,51 +16,26 @@ public:
     explicit SortingHill(size_t number_of_paths,
                          std::vector<std::unique_ptr<SortingHandler>> handlers);
 
-    void AddWagon(Wagon wagon);
+    void AddWagon(const Wagon& wagon);
     bool IsWagonBuffer() const;
     size_t GetNumberOfPaths() const;
     size_t GetNumberOfWagBuffer() const;
 
-    // Проверка возможности события. Использует внутреннее состояние станции,
-    // которое обновляется по OperationInfo после каждого события.
     bool CheckEvent(EventType event) const;
-
     void HandleEvent(EventType event);
 
-    // true, если сейчас выполняется завершение смены
-    bool IsShiftEnding() const {
-        return shift_ending_;
-    }
+    bool IsShiftEnding() const;
 
     // Метрики для отчёта
-    size_t GetPreparedPathsCount() const {
-        return prepared_paths_count_;
-    }
+    size_t GetPreparedPathsCount() const;
+    size_t GetPlannedTrainsCount() const;
+    size_t GetArrivedLocosCount() const;
+    size_t GetProcessedWagonsCount() const;
+    size_t GetSentTrainsCount() const;
 
-    size_t GetPlannedTrainsCount() const {
-        return planned_trains_count_;
-    }
+    size_t GetRingTotal() const;
+    size_t GetRingMax() const;
 
-    size_t GetArrivedLocosCount() const {
-        return arrived_locos_count_;
-    }
-
-    size_t GetProcessedWagonsCount() const {
-        return processed_wagons_count_;
-    }
-
-    size_t GetSentTrainsCount() const {
-        return sent_trains_count_;
-    }
-
-    size_t GetRingTotal() const {
-        return ring_total_;
-    }
-
-    size_t GetRingMax() const {
-        return ring_max_;
-    }
-    
     // Пропущенные вагоны - те, что не попали ни в один отправленный поезд к окончанию смены.
     // Пропущенные вагоны = оставшиеся во входном буфере + оставшиеся на кольцевом пути.
     size_t GetMissedWagons(WagonType type) const;
@@ -87,7 +62,6 @@ private:
 
     std::queue<Wagon> wagon_buffer_;
 
-    // Зеркальная модель станции (для CheckEvent и отчёта)
     std::vector<PathMeta> paths_;
     std::unordered_map<std::string, TrainMeta> trains_;
 
@@ -111,6 +85,15 @@ private:
 
     void ResetShiftState_();
     void ApplyOperationInfo_(const OperationInfo& operation_info);
+
+    void ApplyRingDrainForTrain_(size_t prev_ring_total, const OperationInfo& operation_info);
+    void ApplyPreparePath_(const OperationInfo& operation_info);
+    void ApplyTrainPlanned_(const OperationInfo& operation_info);
+    void ApplyLocoArrived_(const OperationInfo& operation_info);
+    void ApplyWagonArrived_(const OperationInfo& operation_info);
+    void ApplyTrainReady_(const OperationInfo& operation_info);
+
+    void FreePath_(int path_id);
 
     static int WagonTypeIndex_(WagonType type);
     static WagonType TrainNumberToWagonType_(const std::string& train_number);
